@@ -1,0 +1,16 @@
+mongodb:
+  DB_CASHFLOW: "mongodb"
+  DRIVER: "motor"
+  NAME: "absensi_karyawan"
+  USER: "admin"
+  PASSWORD: "admin"
+  HOST: "localhost"
+  PORT: 27017
+
+project:
+  projectPrefix: "/absensi_karyawan"
+  projectName: "Absensi Karyawan"
+  debug: True
+  key: "jlkur98362"
+  algorithm: "HS256"
+  tokenExpiredInMinutes: 60
