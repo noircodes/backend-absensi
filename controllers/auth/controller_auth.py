@@ -4,7 +4,6 @@ from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 import jwt
 from pydantic import BaseModel, Field
 from starlette import status
-from passlib.handlers.bcrypt import bcrypt
 
 from config.config import ACCESS_TOKEN_EXPIRE_MINUTES, JWT_ALGORITHM, JWT_SECRET_KEY
 from helpers.user.user_util import UserUtils
@@ -46,14 +45,12 @@ class AuthController:
 
         return encoded_jwt
 
-
     async def login_data(username: str, password: str):
         user = await UserUtils.get_user_by_username(username)
         if not user:
             raise HTTPException(404, "User not found")
 
-        verify = bcrypt.verify(password, user.password)
-        if not verify:
+        if password != user.password:
             raise HTTPException(401, "Username and password invalid")
         else:
             token_data = JwtToken.model_construct(user.model_fields_set, **user.model_dump())

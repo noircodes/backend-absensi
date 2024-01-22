@@ -9,7 +9,6 @@ from utils.validation_util import ValidationUtils
 from config.mongodb_collections import DB_USER
 from pymongo.results import InsertOneResult, UpdateResult
 
-from passlib.handlers.bcrypt import bcrypt
 
 
 class UserHelper:
@@ -52,7 +51,6 @@ class UserHelper:
         user_base.createTime = DatetimeUtils.datetime_now()
         user_base.createdBy = user_id
         user_base.isDelete = False
-        user_base.password = bcrypt.hash(user_base.password)
         
         try:
             op_create_user: InsertOneResult = await DB_USER.insert_one(user_base.model_dump())
