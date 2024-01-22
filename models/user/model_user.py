@@ -6,7 +6,7 @@ from config.mongodb_collections import DB_USER
 
 from models.model_utils import DefaultModel
 from utils.datatypes_util import ObjectIdStr, BaseModel
-from passlib.handlers.bcrypt import bcrypt
+# from passlib.handlers.bcrypt import bcrypt
 
 from utils.datetimes_util import DatetimeUtils
 
@@ -33,24 +33,24 @@ class UserView(UserRequest, DefaultModel):
 class UserInDb(UserRequest, DefaultModel):
     id: ObjectIdStr = Field(alias="_id")
     
-user_instance = UserView(
-    createTime=DatetimeUtils.datetime_now(),
-    createdBy=None,
-    updateTime=None,
-    updatedBy=None,
-    isDelete=False,
-    deleteBy=None,
-    deleteTime=None,
-    name="Administrator",
-    photoUrl="string",
-    email="admin@mail.com",
-    phone="08123456789",
-    tags=[],
-    username="admin",
-    password=bcrypt.hash("admin"),
-    noId="A1",
-    role=RoleType.ADMIN
-)
+# user_instance = UserView(
+#     createTime=DatetimeUtils.datetime_now(),
+#     createdBy=None,
+#     updateTime=None,
+#     updatedBy=None,
+#     isDelete=False,
+#     deleteBy=None,
+#     deleteTime=None,
+#     name="Administrator",
+#     photoUrl="string",
+#     email="admin@mail.com",
+#     phone="08123456789",
+#     tags=[],
+#     username="admin",
+#     password=bcrypt.hash("admin"),
+#     noId="A1",
+#     role=RoleType.ADMIN
+# )
 
-async def create_user_instances():
-    await DB_USER.insert_one(user_instance.model_dump())
+# async def create_user_instances():
+#     await DB_USER.insert_one(user_instance.model_dump())

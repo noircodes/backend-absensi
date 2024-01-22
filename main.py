@@ -11,7 +11,7 @@ from starlette.responses import JSONResponse
 
 from config.config import PROJECT_NAME
 from controllers.user.controller_user import UserController
-from models.user.model_user import create_user_instances
+# from models.user.model_user import create_user_instances
 from routers.auth.router_auth import router_auth
 from routers.user.router_user import router_user
 from routers.attendance.router_attendance_admin import router_attendance_admin
@@ -21,11 +21,11 @@ from routers.attendance.router_attendance import router_attendance
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("Starting Backend-Personal-Cashflow")
-    check_user = await UserController.get_all_users()
-    if not check_user:
-        await create_user_instances()
-        logger.info("Initial User Created")
-        print("initial user created")
+    # check_user = await UserController.get_all_users()
+    # if not check_user:
+    #     await create_user_instances()
+    #     logger.info("Initial User Created")
+    #     print("initial user created")
 
     logging.info("*** Backend-Personal-Cashflow Started ***")
     yield
