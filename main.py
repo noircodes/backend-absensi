@@ -1,4 +1,5 @@
 import logging
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -68,6 +69,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             }
         ),
     )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*", "*"],
+    allow_credentials=True,
+    allow_methods=["*", "*"],
+    allow_headers=["*", "*"],
+)
 
 @app.get("/")
 async def root():
