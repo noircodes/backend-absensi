@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+import re
 from typing import List, Union
 from fastapi import HTTPException
 from loguru import logger
 from helpers.attendance.attendance_util import AttendanceUtils
 from helpers.user.helper_user import UserHelper
-from models.attendance.model_attendance import Attendance, AttendanceInDb, AttendanceView
+from models.attendance.model_attendance import Attendance, AttendanceInDb, AttendanceView, StatusType
 from utils.datatypes_util import ObjectIdStr
 from utils.datetimes_util import DatetimeUtils
 from config.mongodb_collections import DB_ATTENDANCE
@@ -14,10 +15,46 @@ from pymongo.results import InsertOneResult, UpdateResult
 class AttendanceHelper:
     
     @staticmethod
-    async def get_all_attendances() -> List[AttendanceInDb]:
+    async def get_all_attendances(
+        name: str,
+        date: str,
+        checkin_status: StatusType,
+        checkout_status: StatusType
+    ) -> List[AttendanceInDb]:
         query = {
             "isDelete": False
         }
+        if name not in ["", None]:
+            namePattern = re.compile(name, re.IGNORECASE)
+            query["employeeDetail.name"] = {"$regex": namePattern}
+        
+        if date not in ["", None]:    
+            try:
+                if "/" in date:
+                    date = date.split("/")
+                elif ":" in date:
+                    date = date[0:10].split("-")
+                elif "-" in date:
+                    date = date.split("-")
+                else:
+                    date = date.split(" ")
+
+                date = datetime.strptime(
+                    "-".join(date), "%d-%m-%Y"
+                )
+            except Exception as err:
+                logger.error(err)
+                raise HTTPException(
+                    400, f"Format tanggal {date} tidak valid"
+                )
+            query["checkIn.timestamp"] = {"$gte": date, "$lte": date + timedelta(days=1)}
+            
+        if checkin_status not in ["", None]:
+            query["checkIn.status"] = checkin_status
+            
+        if checkout_status not in ["", None]:
+            query["checkOut.status"] = checkout_status
+            
         try:
             result = await DB_ATTENDANCE.find(query).to_list(None)
             return result

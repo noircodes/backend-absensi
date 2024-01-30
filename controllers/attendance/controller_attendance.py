@@ -13,8 +13,18 @@ from utils.validation_util import ValidationUtils
 class AttendanceController:
     
     @staticmethod
-    async def get_all_attendances() -> List[AttendanceInDb]:
-        return await AttendanceHelper.get_all_attendances()
+    async def get_all_attendances(
+        name: str,
+        date: str,
+        checkin_status: StatusType,
+        checkout_status: StatusType
+    ) -> List[AttendanceInDb]:
+        return await AttendanceHelper.get_all_attendances(
+            name,
+            date,
+            checkin_status,
+            checkout_status
+        )
     
     @staticmethod
     async def get_attendance_by_id(
