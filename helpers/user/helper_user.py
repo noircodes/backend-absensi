@@ -1,8 +1,9 @@
+import re
 from typing import List
 from fastapi import HTTPException
 from loguru import logger
 from helpers.user.user_util import UserUtils
-from models.user.model_user import UserInDb, UserRequest, UserUpdate, UserView
+from models.user.model_user import RoleType, UserInDb, UserRequest, UserUpdate, UserView
 from utils.datatypes_util import ObjectIdStr
 from utils.datetimes_util import DatetimeUtils
 from utils.validation_util import ValidationUtils
@@ -14,10 +15,20 @@ from pymongo.results import InsertOneResult, UpdateResult
 class UserHelper:
     
     @staticmethod
-    async def get_all_users() -> List[UserInDb]:
+    async def get_all_users(
+        name: str,
+        role: RoleType    
+    ) -> List[UserInDb]:
         query = {
             "isDelete": False
         }
+        if name not in ["", None]:
+            namePattern = re.compile(name, re.IGNORECASE)
+            query["name"] = {"$regex" : namePattern}
+            
+        if role not in ["", None]:
+            query["role"] = role
+            
         try:
             result = await DB_USER.find(query).to_list(None)
             return result

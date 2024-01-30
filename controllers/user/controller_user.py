@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import HTTPException
 from helpers.user.helper_user import UserHelper
-from models.user.model_user import UserInDb, UserRequest, UserUpdate
+from models.user.model_user import RoleType, UserInDb, UserRequest, UserUpdate
 from utils.datatypes_util import ObjectIdStr
 from utils.validation_util import ValidationUtils
 
@@ -10,8 +10,14 @@ from utils.validation_util import ValidationUtils
 class UserController:
     
     @staticmethod
-    async def get_all_users() -> List[UserInDb]:
-        return await UserHelper.get_all_users()
+    async def get_all_users(
+        name: str,
+        role: RoleType    
+    ) -> List[UserInDb]:
+        return await UserHelper.get_all_users(
+            name,
+            role
+        )
     
     @staticmethod
     async def get_user_by_id(

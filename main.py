@@ -22,7 +22,7 @@ from routers.attendance.router_attendance import router_attendance
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logging.info("Starting Backend-Personal-Cashflow")
-    check_user = await UserController.get_all_users()
+    check_user = await UserController.get_all_users(None, None)
     if not check_user:
         await create_user_instances()
         logger.info("Initial User Created")

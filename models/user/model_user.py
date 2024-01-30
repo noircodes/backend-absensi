@@ -28,6 +28,11 @@ class UserRequest(UserUpdate):
     
 class UserView(UserRequest, DefaultModel):
     pass
+
+class UserResponse(UserUpdate, DefaultModel):
+    username: str
+    noId: Optional[str] = None
+    role: RoleType = None
     
 class UserInDb(UserRequest, DefaultModel):
     id: ObjectIdStr = Field(alias="_id")
