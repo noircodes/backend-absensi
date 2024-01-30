@@ -6,7 +6,7 @@ from models.attendance.model_attendance import Attendance, AttendanceInDb
 from utils.datatypes_util import ObjectIdStr
 
 
-router_attendance_admin = APIRouter(prefix="/attendance/admin", tags=["Attendance Service - ADMIN"])
+router_attendance_admin = APIRouter(prefix="/admin/attendance", tags=["Attendance Service - ADMIN"])
 
 @router_attendance_admin.get("", response_model=List[AttendanceInDb])
 async def admin_get_all_attendances(

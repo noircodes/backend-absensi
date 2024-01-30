@@ -78,6 +78,7 @@ class AttendanceHelper:
         attendance_base.employeeDetail.employeeId = user_id
         attendance_base.employeeDetail.name = user_data.name
         attendance_base.employeeDetail.noId = user_data.noId
+        attendance_base.employeeDetail.photoUrl = user_data.photoUrl
         
         attendance_base.createTime = DatetimeUtils.datetime_now()
         attendance_base.createdBy = user_id

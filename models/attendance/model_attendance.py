@@ -16,6 +16,7 @@ class EmployeeDetail(BaseModel):
     name: str = None
     noId: str = None
     employeeId: ObjectIdStr = None
+    photoUrl: str = None
     
 class Checks(BaseModel):
     timestamp: Optional[datetime] = None
