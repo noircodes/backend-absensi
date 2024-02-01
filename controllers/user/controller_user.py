@@ -1,9 +1,13 @@
+import re
 from typing import List
 
 from fastapi import HTTPException
+from config.mongodb_collections import DB_USER
 from helpers.user.helper_user import UserHelper
-from models.user.model_user import RoleType, UserInDb, UserRequest, UserUpdate
+from models.user.model_user import RoleType, UserInDb, UserRequest, UserResponse, UserUpdate
 from utils.datatypes_util import ObjectIdStr
+from utils.pagination.model_pagination_util import MsPagination, MsPaginationResult
+from utils.pagination.pagination_util import Paginate
 from utils.validation_util import ValidationUtils
 
 
@@ -12,11 +16,35 @@ class UserController:
     @staticmethod
     async def get_all_users(
         name: str,
-        role: str    
-    ) -> List[UserInDb]:
+        role: str
+    ) -> List [UserResponse]:
         return await UserHelper.get_all_users(
             name,
             role
+        )
+    
+    @staticmethod
+    async def get_users_in_pagination(
+        name: str,
+        role: str,
+        paging: MsPagination
+    ) -> MsPaginationResult[UserResponse]:
+        query = {
+            "isDelete": False
+        }
+        if name not in ["", None]:
+            namePattern = re.compile(name, re.IGNORECASE)
+            query["name"] = {"$regex": namePattern}
+            
+        if role not in ["", None]:
+            query["checkOut.status"] = role
+        
+        return await Paginate(
+            DB_USER,
+            query,
+            paging,
+            None,
+            UserResponse
         )
     
     @staticmethod
