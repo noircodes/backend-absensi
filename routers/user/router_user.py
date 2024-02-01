@@ -11,7 +11,7 @@ router_user = APIRouter(prefix="/user", tags=["User Service"])
 @router_user.get("", response_model=List[UserResponse])
 async def get_all_users(
     name: str = None,
-    role: RoleType = None,
+    role: str = None,
     credential: JwtToken = Security(
         AuthController.get_current_user_data,
         scopes=["*"]

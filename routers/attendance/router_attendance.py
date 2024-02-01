@@ -1,9 +1,10 @@
 from typing import List
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Depends, Security
 from controllers.attendance.controller_attendance import AttendanceController
 from controllers.auth.controller_auth import AuthController, JwtToken
 from models.attendance.model_attendance import Attendance, AttendanceInDb, StatusType
 from utils.datatypes_util import ObjectIdStr
+from utils.pagination.model_pagination_util import MsPagination
 
 
 router_attendance = APIRouter(prefix="/attendance", tags=["Attendance Service - EMPLOYEE"])
@@ -14,6 +15,7 @@ async def employee_get_all_attendances(
     date: str = None,   
     checkin_status: StatusType = None,
     checkout_status: StatusType = None,
+    paging: MsPagination = Depends(MsPagination.QueryParam),
     credential: JwtToken = Security(
         AuthController.get_current_user_data,
         scopes=["EMPLOYEE"]
@@ -23,7 +25,8 @@ async def employee_get_all_attendances(
         name,
         date,
         checkin_status,
-        checkout_status
+        checkout_status,
+        paging
     )
 
 @router_attendance.get("/{id}", response_model=AttendanceInDb)

@@ -10,14 +10,12 @@ from utils.validation_util import ValidationUtils
 from config.mongodb_collections import DB_USER
 from pymongo.results import InsertOneResult, UpdateResult
 
-
-
 class UserHelper:
     
     @staticmethod
     async def get_all_users(
         name: str,
-        role: RoleType    
+        role: str    
     ) -> List[UserInDb]:
         query = {
             "isDelete": False

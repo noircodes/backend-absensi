@@ -1,12 +1,17 @@
-from datetime import time, timedelta
+from datetime import datetime, time, timedelta
+import re
 from typing import List
 
 from fastapi import HTTPException
+from loguru import logger
+from config.mongodb_collections import DB_ATTENDANCE
 
 from helpers.attendance.helper_attendance import AttendanceHelper
 from models.attendance.model_attendance import Attendance, AttendanceInDb, Checks, StatusType
 from utils.datatypes_util import ObjectIdStr
 from utils.datetimes_util import DatetimeUtils
+from utils.pagination.model_pagination_util import MsPagination, MsPaginationResult
+from utils.pagination.pagination_util import Paginate
 from utils.validation_util import ValidationUtils
 
 
@@ -17,13 +22,49 @@ class AttendanceController:
         name: str,
         date: str,
         checkin_status: StatusType,
-        checkout_status: StatusType
-    ) -> List[AttendanceInDb]:
-        return await AttendanceHelper.get_all_attendances(
-            name,
-            date,
-            checkin_status,
-            checkout_status
+        checkout_status: StatusType,
+        paging: MsPagination,
+    ) -> MsPaginationResult[AttendanceInDb]:
+        query = {
+            "isDelete": False
+        }
+        if name not in ["", None]:
+            namePattern = re.compile(name, re.IGNORECASE)
+            query["employeeDetail.name"] = {"$regex": namePattern}
+        
+        if date not in ["", None]:    
+            try:
+                if "/" in date:
+                    date = date.split("/")
+                elif ":" in date:
+                    date = date[0:10].split("-")
+                elif "-" in date:
+                    date = date.split("-")
+                else:
+                    date = date.split(" ")
+
+                date = datetime.strptime(
+                    "-".join(date), "%m-%d-%Y"
+                )
+            except Exception as err:
+                logger.error(err)
+                raise HTTPException(
+                    400, f"Format tanggal {date} tidak valid"
+                )
+            query["checkIn.timestamp"] = {"$gte": date, "$lte": date + timedelta(days=1)}
+            
+        if checkin_status not in ["", None]:
+            query["checkIn.status"] = checkin_status
+            
+        if checkout_status not in ["", None]:
+            query["checkOut.status"] = checkout_status
+        
+        return await Paginate(
+            DB_ATTENDANCE,
+            query,
+            paging,
+            None,
+            AttendanceInDb
         )
     
     @staticmethod

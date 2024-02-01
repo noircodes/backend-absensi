@@ -12,7 +12,7 @@ class UserController:
     @staticmethod
     async def get_all_users(
         name: str,
-        role: RoleType    
+        role: str    
     ) -> List[UserInDb]:
         return await UserHelper.get_all_users(
             name,
