@@ -37,7 +37,7 @@ class UserController:
             query["name"] = {"$regex": namePattern}
             
         if role not in ["", None]:
-            query["checkOut.status"] = role
+            query["role"] = role
         
         return await Paginate(
             DB_USER,

@@ -16,7 +16,7 @@ async def get_users_in_pagination(
     paging: MsPagination = Depends(MsPagination.QueryParam),
     credential: JwtToken = Security(
         AuthController.get_current_user_data,
-        scopes=["*"]
+        scopes=["ADMIN"]
     )
 ):
     return await UserController.get_users_in_pagination(
@@ -30,7 +30,7 @@ async def get_user_by_id(
     id: ObjectIdStr,
     credential: JwtToken = Security(
         AuthController.get_current_user_data,
-        scopes=["*"]
+        scopes=["ADMIN"]
     )
 ):
     return await UserController.get_user_by_id(id)
@@ -51,7 +51,7 @@ async def update_user(
     request: UserUpdate,
     credential: JwtToken = Security(
         AuthController.get_current_user_data,
-        scopes=["*"]
+        scopes=["ADMIN"]
     )
 ):
     return await UserController.update_user(id, request, credential.userId)
@@ -61,7 +61,7 @@ async def delete_user(
     id: ObjectIdStr,
     credential: JwtToken = Security(
         AuthController.get_current_user_data,
-        scopes=["*"]
+        scopes=["ADMIN"]
     )
 ):
     return await UserController.delete_user(id, credential.userId)
