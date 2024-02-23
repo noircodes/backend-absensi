@@ -12,7 +12,8 @@ router_attendance_admin = APIRouter(prefix="/admin/attendance", tags=["Attendanc
 @router_attendance_admin.get("", response_model=MsPaginationResult[AttendanceInDb])
 async def admin_get_all_attendances(
     name: str = None,
-    date: str = None,   
+    date: str = None,
+    employee_id: ObjectIdStr = None,
     checkin_status: StatusType = None,
     checkout_status: StatusType = None,
     paging: MsPagination = Depends(MsPagination.QueryParam),
@@ -24,6 +25,7 @@ async def admin_get_all_attendances(
     return await AttendanceController.get_all_attendances(
         name,
         date,
+        employee_id,
         checkin_status,
         checkout_status,
         paging

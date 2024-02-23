@@ -21,6 +21,7 @@ class AttendanceController:
     async def get_all_attendances(
         name: str,
         date: str,
+        employee_id: ObjectIdStr,
         checkin_status: StatusType,
         checkout_status: StatusType,
         paging: MsPagination,
@@ -31,6 +32,9 @@ class AttendanceController:
         if name not in ["", None]:
             namePattern = re.compile(name, re.IGNORECASE)
             query["employeeDetail.name"] = {"$regex": namePattern}
+        
+        if employee_id not in ["", None]:
+            query["employeeDetail.employeeId"] = ObjectIdStr(employee_id)
         
         if date not in ["", None]:    
             try:
@@ -58,6 +62,8 @@ class AttendanceController:
             
         if checkout_status not in ["", None]:
             query["checkOut.status"] = checkout_status
+            
+        print(query)
         
         return await Paginate(
             DB_ATTENDANCE,

@@ -4,12 +4,12 @@ from controllers.attendance.controller_attendance import AttendanceController
 from controllers.auth.controller_auth import AuthController, JwtToken
 from models.attendance.model_attendance import Attendance, AttendanceInDb, StatusType
 from utils.datatypes_util import ObjectIdStr
-from utils.pagination.model_pagination_util import MsPagination
+from utils.pagination.model_pagination_util import MsPagination, MsPaginationResult
 
 
 router_attendance = APIRouter(prefix="/attendance", tags=["Attendance Service - EMPLOYEE"])
 
-@router_attendance.get("", response_model=List[AttendanceInDb])
+@router_attendance.get("", response_model=MsPaginationResult[AttendanceInDb])
 async def employee_get_all_attendances(
     name: str = None,
     date: str = None,   
@@ -24,6 +24,7 @@ async def employee_get_all_attendances(
     return await AttendanceController.get_all_attendances(
         name,
         date,
+        credential.userId,
         checkin_status,
         checkout_status,
         paging
