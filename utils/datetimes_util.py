@@ -13,6 +13,7 @@ TIME_FORMAT = "%H:%M:%S"
 
 class DatetimeUtils:
 # ===== Function
+    @staticmethod
     def date_now():
         """Function to get current date with Asia/Jakarta time zone"""
 
@@ -21,14 +22,14 @@ class DatetimeUtils:
         )
         return dt.date()
 
-
+    @staticmethod
     def date_now_str():
         """Function to get current string date with Asia/Jakarta time zone"""
 
         dt = datetime.now(tz=INDONESIA_TIMEZONE).strftime(DATE_FORMAT)
         return dt
 
-
+    @staticmethod
     def str_date_to_date(str_date: str):
         """Function to convert current string date to datetime date"""
 
@@ -42,7 +43,7 @@ class DatetimeUtils:
                 "Format tanggal tidak valid, contoh format = '2020-12-01'"
             )
 
-
+    @staticmethod
     def time_now():
         """Function to get current time with Asia/Jakarta time zone"""
 
@@ -51,14 +52,14 @@ class DatetimeUtils:
         )
         return dt.time()
 
-
+    @staticmethod
     def time_now_str():
         """Function to get current string time with Asia/Jakarta time zone"""
 
         dt = datetime.now(tz=INDONESIA_TIMEZONE).strftime(TIME_FORMAT)
         return dt
 
-
+    @staticmethod
     def str_time_to_time(str_time: str):
         """Function to convert current string time to datetime time"""
 
@@ -72,7 +73,7 @@ class DatetimeUtils:
                 "Format waktu tidak valid, contoh format = '08:00:00'"
             )
 
-
+    @staticmethod
     def datetime_now():
         """Function to get current datetime with Asia/Jakarta time zone"""
 
@@ -81,14 +82,14 @@ class DatetimeUtils:
         )
         return dt
 
-
+    @staticmethod
     def datetime_now_str():
         """Function to get current string time with Asia/Jakarta time zone"""
 
         dt = datetime.now(tz=INDONESIA_TIMEZONE).strftime(DATETIME_FORMAT)
         return dt
 
-
+    @staticmethod
     def str_datetime_to_datetime(str_datetime: str):
         """Function to convert current string datetime to datetime"""
 
@@ -102,7 +103,7 @@ class DatetimeUtils:
                 "Format waktu tidak valid, contoh format = '2020-12-01 08:00:00'"
             )
 
-
+    @staticmethod
     def str_month_to_month(str_month: str):
         """Function to convert current string month to str month number"""
 

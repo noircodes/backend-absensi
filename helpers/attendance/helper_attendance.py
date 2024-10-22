@@ -1,6 +1,6 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 import re
-from typing import List, Union
+from typing import Any, List, Union
 from fastapi import HTTPException
 from loguru import logger
 from helpers.attendance.attendance_util import AttendanceUtils
@@ -9,45 +9,46 @@ from models.attendance.model_attendance import Attendance, AttendanceInDb, Atten
 from utils.datatypes_util import ObjectIdStr
 from utils.datetimes_util import DatetimeUtils
 from config.mongodb_collections import DB_ATTENDANCE
-from pymongo.results import InsertOneResult, UpdateResult
+from pymongo.results import InsertOneResult
 
 
 class AttendanceHelper:
     
     @staticmethod
     async def get_all_attendances(
-        name: str,
-        date: str,
+        name: str | None,
+        date: str | None,
         checkin_status: StatusType,
         checkout_status: StatusType
     ) -> List[AttendanceInDb]:
-        query = {
+        query: dict[str, Any] = {
             "isDelete": False
         }
-        if name not in ["", None]:
-            namePattern = re.compile(name, re.IGNORECASE)
-            query["employeeDetail.name"] = {"$regex": namePattern}
+        if name is not None:
+            if len(name.split()) != 0:
+                namePattern = re.compile(name, re.IGNORECASE)
+                query["employeeDetail.name"] = {"$regex": namePattern}
         
-        if date not in ["", None]:    
+        if date is not None:   
             try:
                 if "/" in date:
-                    date = date.split("/")
+                    new_date = date.split("/")
                 elif ":" in date:
-                    date = date[0:10].split("-")
+                    new_date = date[0:10].split("-")
                 elif "-" in date:
-                    date = date.split("-")
+                    new_date = date.split("-")
                 else:
-                    date = date.split(" ")
+                    new_date = date.split(" ")
 
-                date = datetime.strptime(
-                    "-".join(date), "%d-%m-%Y"
+                converted_date = datetime.strptime(
+                    "-".join(new_date), "%d-%m-%Y"
                 )
             except Exception as err:
                 logger.error(err)
                 raise HTTPException(
                     400, f"Format tanggal {date} tidak valid"
                 )
-            query["checkIn.timestamp"] = {"$gte": date, "$lte": date + timedelta(days=1)}
+            query["checkIn.timestamp"] = {"$gte": converted_date, "$lte": converted_date + timedelta(days=1)}
             
         if checkin_status not in ["", None]:
             query["checkIn.status"] = checkin_status
@@ -56,17 +57,17 @@ class AttendanceHelper:
             query["checkOut.status"] = checkout_status
             
         try:
-            result = await DB_ATTENDANCE.find(query).to_list(None)
-            return result
+            results: list[dict[str, Any]] = await DB_ATTENDANCE.find(query).to_list(None) # type: ignore
+            return [AttendanceInDb(**result) for result in results]
         except Exception as err:
             logger.error(err)
             raise HTTPException(500, "Gagal menampilkan data absensi")
         
     @staticmethod
     async def get_attendance_by_id(
-        id: ObjectIdStr
+        id: ObjectIdStr | None
     ) -> AttendanceInDb:
-        query = {
+        query: dict[str, Any] = {
             "isDelete": False,
             "_id": id
         }
@@ -74,7 +75,7 @@ class AttendanceHelper:
             result = await DB_ATTENDANCE.find_one(query)
             if not result:
                 raise HTTPException(404, "Absensi tidak ditemukan")
-            return result
+            return AttendanceInDb(**result)
         except Exception as err:
             logger.error(err)
             raise HTTPException(500, "Gagal menampilkan data absensi")
@@ -84,7 +85,7 @@ class AttendanceHelper:
         employee_id: ObjectIdStr,
         is_already_check_out: bool = False
     ) -> Union[AttendanceInDb, bool]:
-        query = {
+        query:dict [str, Any] = {
             "isDelete": False,
             "employeeDetail.employeeId": employee_id
         }
@@ -125,7 +126,6 @@ class AttendanceHelper:
             op_create_user: InsertOneResult = await DB_ATTENDANCE.insert_one(attendance_base.model_dump())
         except Exception as err:
             logger.error(err)
-            op_create_user = None
             raise HTTPException(500, "Gagal menambahkan data absensi")
         
         return await AttendanceUtils.get_attendance_by_id_or_404(op_create_user.inserted_id)
@@ -141,7 +141,7 @@ class AttendanceHelper:
         attendance_update["updatedBy"] = user_id
         
         try:
-            op_update_attendance: UpdateResult = await DB_ATTENDANCE.update_one(
+            await DB_ATTENDANCE.update_one(
                 {"_id": id},
                 {"$set": attendance_update}
             )
@@ -156,7 +156,7 @@ class AttendanceHelper:
         user_id: ObjectIdStr
     ):
         try:
-            delete_attendance: UpdateResult = await DB_ATTENDANCE.update_one(
+            await DB_ATTENDANCE.update_one(
                 {"_id": id},
                 {
                     "$set": {

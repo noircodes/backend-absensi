@@ -1,35 +1,41 @@
 import re
-from typing import List
+from typing import Any, List
 from fastapi import HTTPException
 from loguru import logger
 from helpers.user.user_util import UserUtils
-from models.user.model_user import RoleType, UserInDb, UserRequest, UserUpdate, UserView
+from models.user.model_user import UserInDb, UserRequest, UserUpdate, UserView
 from utils.datatypes_util import ObjectIdStr
 from utils.datetimes_util import DatetimeUtils
-from utils.validation_util import ValidationUtils
 from config.mongodb_collections import DB_USER
 from pymongo.results import InsertOneResult, UpdateResult
+from utils.datatypes_util import TGenericBaseModel
 
 class UserHelper:
     
     @staticmethod
     async def get_all_users(
-        name: str,
-        role: str    
-    ) -> List[UserInDb]:
-        query = {
+        name: str | None,
+        role: str | None,
+        resultClass: type[TGenericBaseModel] = UserView
+    ) -> List[TGenericBaseModel]:
+        query: dict[str, Any] = {
             "isDelete": False
         }
-        if name not in ["", None]:
-            namePattern = re.compile(name, re.IGNORECASE)
-            query["name"] = {"$regex" : namePattern}
+        if name is not None:
+            if len(name.strip()) != 0:
+                namePattern = re.compile(name, re.IGNORECASE)
+                query["name"] = {"$regex" : namePattern}
             
         if role not in ["", None]:
             query["role"] = role
             
         try:
-            result = await DB_USER.find(query).to_list(None)
-            return result
+            cursor = DB_USER.find(
+                query,
+                resultClass.Projection(),
+            )
+            results: list[dict[str, Any]] = await cursor.to_list(None) # type: ignore
+            return [resultClass(**result) for result in results]
         except Exception as err:
             logger.error(err)
             raise HTTPException(500, "Gagal menampilkan data user")
@@ -38,7 +44,7 @@ class UserHelper:
     async def get_user_by_id(
         id: ObjectIdStr
     ) -> UserInDb:
-        query = {
+        query: dict[str, Any] = {
             "isDelete": False,
             "_id": id
         }
@@ -65,7 +71,6 @@ class UserHelper:
             op_create_user: InsertOneResult = await DB_USER.insert_one(user_base.model_dump())
         except Exception as err:
             logger.error(err)
-            op_create_user = None
             raise HTTPException(500, "Gagal menambahkan user")
         
         return await UserUtils.get_user_by_id_or_404(op_create_user.inserted_id)
@@ -75,7 +80,7 @@ class UserHelper:
         id: ObjectIdStr,
         request: UserUpdate,
         user_id: ObjectIdStr
-    ) -> UserInDb:
+    ) -> UserInDb | None:
         user_update = request.model_dump()
         user_update["updateTime"] = DatetimeUtils.datetime_now()
         user_update["updatedBy"] = user_id
@@ -85,7 +90,8 @@ class UserHelper:
                 {"_id": id},
                 {"$set": user_update}
             )
-            return await UserUtils.get_user_by_id_or_404(id)
+            if op_update_user.matched_count > 0:
+                return await UserUtils.get_user_by_id_or_404(id)
         except Exception as err:
             logger.error(err)
             raise HTTPException(500, "Gagal mengubah data user")
@@ -96,7 +102,7 @@ class UserHelper:
         user_id: ObjectIdStr
     ):
         try:
-            delete_user: UpdateResult = await DB_USER.update_one(
+            await DB_USER.update_one(
                 {"_id": id},
                 {
                     "$set": {

@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import Field
 from models.model_utils import DefaultModel
@@ -13,15 +12,15 @@ class StatusType(str, Enum):
     NOT_ON_TIME = "TIDAK TEPAT WAKTU"
     
 class EmployeeDetail(BaseModel):
-    name: str = None
-    noId: str = None
-    employeeId: ObjectIdStr = None
-    photoUrl: str = None
+    name: str | None = None
+    noId: str | None = None
+    employeeId: ObjectIdStr | None = None
+    photoUrl: str | None = None
     
 class Checks(BaseModel):
-    timestamp: Optional[datetime] = None
-    status: Optional[StatusType] = None
-    attendanceMethod: Optional[str] = None
+    timestamp: datetime | None = None
+    status: StatusType | None = None
+    attendanceMethod: str | None = None
 
 class Attendance(BaseModel):
     checkIn: Checks = Field(default_factory=Checks)

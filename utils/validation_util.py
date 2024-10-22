@@ -6,6 +6,9 @@ from bson.objectid import ObjectId
 # ===== Header
 from fastapi import HTTPException
 
+from config.config import ENVIRONMENT
+from utils.datatypes_util import ObjectIdStr
+
 regex_email = re.compile(
     r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
 )
@@ -17,7 +20,7 @@ regex_email = re.compile(
 
 # ===== Main
 class ValidationUtils:
-
+    @staticmethod
     def validate_phone(str_phone: str, min: int = 7, max: int = 14):
         """Function to validate phone number"""
 
@@ -29,7 +32,7 @@ class ValidationUtils:
 
         return True
 
-
+    @staticmethod
     def validate_email(str_email: str):
         """Function to validate email"""
 
@@ -38,7 +41,7 @@ class ValidationUtils:
 
         return True
 
-
+    @staticmethod
     def validate_password(password: str, min: int = 6, max: int = 24):
         """Function to validate password"""
 
@@ -65,8 +68,8 @@ class ValidationUtils:
 
         return True
 
-
-    def validate_objectid(str_objectid: str, varName: str) -> ObjectId:
+    @staticmethod
+    def validate_objectid(str_objectid: str | ObjectIdStr, varName: str) -> ObjectId:
         """Function to validate ObjectId"""
 
         if not ObjectId.is_valid(str_objectid):
@@ -76,4 +79,6 @@ class ValidationUtils:
             oid = ObjectId(str_objectid)
             return oid
         except Exception as err:
+            if ENVIRONMENT == "development":
+                print(err)
             raise HTTPException(status_code=400, detail=f"ObjectId '{varName}' tidak valid.")

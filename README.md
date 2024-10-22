@@ -1,0 +1,9 @@
+### Libraries
+- fastapi
+- loguru
+- motor
+- pyyaml
+- pytz
+- pyjwt
+- python-multipart
+- uvicorn

@@ -11,6 +11,7 @@ project:
   projectPrefix: "/absensi_karyawan"
   projectName: "Absensi Karyawan"
   debug: True
-  key: "jlkur98362"
+  key: "947cc8d843ca3bb645de29568a47df70ef5f1985f39d820ec3456cb82754cd2c"
   algorithm: "HS256"
   tokenExpiredInMinutes: 60
+  environment: "development"

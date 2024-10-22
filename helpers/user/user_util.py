@@ -1,13 +1,14 @@
 from fastapi import HTTPException
 from config.mongodb_collections import DB_USER
 from models.user.model_user import UserInDb
+from utils.datatypes_util import ObjectIdStr
 from utils.validation_util import ValidationUtils
 
 
 class UserUtils:
     
     @staticmethod
-    async def get_user_by_id_or_404(user_id: str, devel_password: str = None):
+    async def get_user_by_id_or_404(user_id: ObjectIdStr, devel_password: str | None = None):
         user = await DB_USER.find_one(
             {"isDelete": False, "_id": ValidationUtils.validate_objectid(user_id, "User ID")}
         )
@@ -19,7 +20,7 @@ class UserUtils:
         return result
 
     @staticmethod
-    async def get_user_by_id(user_id: str, devel_password: str = None):
+    async def get_user_by_id(user_id: str, devel_password: str | None = None):
         user = await DB_USER.find_one(
             {"isDelete": False, "_id": ValidationUtils.validate_objectid(user_id, "User ID")}
         )
@@ -66,7 +67,6 @@ class UserUtils:
     @staticmethod
     async def get_user_by_username(username: str):
         user = await DB_USER.find_one({"isDelete": False, "username": username})
-        print(user)
         if user:
             return UserInDb(**user)
         return False

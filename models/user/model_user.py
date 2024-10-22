@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import List, Optional
-from bson import ObjectId
 from pydantic import Field
 from config.mongodb_collections import DB_USER
 
@@ -15,16 +14,16 @@ class RoleType(str, Enum):
     
 class UserUpdate(BaseModel):
     name: str
-    photoUrl: str = None
-    email: str = None
-    phone: str = None
-    tags: List[str] = None
+    photoUrl: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    tags: List[str] = []
 
 class UserRequest(UserUpdate):
     username: str
     password: str
-    noId: Optional[str] = None
-    role: RoleType = None
+    noId: Optional[str] | None = None
+    role: RoleType = RoleType.EMPLOYEE
     
 class UserView(UserRequest, DefaultModel):
     pass
@@ -32,7 +31,7 @@ class UserView(UserRequest, DefaultModel):
 class UserResponse(UserUpdate, DefaultModel):
     username: str
     noId: Optional[str] = None
-    role: RoleType = None
+    role: RoleType | None = None
     
 class UserInDb(UserRequest, DefaultModel):
     id: ObjectIdStr = Field(alias="_id")

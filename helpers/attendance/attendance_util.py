@@ -1,13 +1,14 @@
 from fastapi import HTTPException
 from config.mongodb_collections import DB_ATTENDANCE
 from models.attendance.model_attendance import AttendanceInDb
+from utils.datatypes_util import ObjectIdStr
 from utils.validation_util import ValidationUtils
 
 
 class AttendanceUtils:
     
     @staticmethod
-    async def get_attendance_by_id_or_404(attendance_id: str):
+    async def get_attendance_by_id_or_404(attendance_id: ObjectIdStr):
         user = await DB_ATTENDANCE.find_one(
             {"isDelete": False, "_id": ValidationUtils.validate_objectid(attendance_id, "Attendance ID")}
         )

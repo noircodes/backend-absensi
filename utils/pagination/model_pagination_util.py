@@ -3,7 +3,6 @@ from typing import Generic, List, TypeVar
 
 from fastapi import Query
 from pydantic import Field
-from pydantic.generics import GenericModel
 
 from utils.datatypes_util import BaseModel
 
@@ -14,9 +13,9 @@ class QuerySortingOrder(str, Enum):
 
 class MsPagination(BaseModel):
 
-    sortby: str = Field(
+    sortby: str | None = Field(
         default=None,
-        example="createdTime"
+        examples=["createdTime"]
     )
     size: int = Field(
         default=100,
@@ -61,29 +60,29 @@ class MsPagination(BaseModel):
             order=order
         )
     
-TGenericPaginationModel = TypeVar("TGenericPaginationModel") # must derived from BaseModel
+TGenericPaginationModel = TypeVar("TGenericPaginationModel", bound=BaseModel) # must derived from BaseModel
     
-class MsPaginationResult(GenericModel, Generic[TGenericPaginationModel]):
+class MsPaginationResult(BaseModel, Generic[TGenericPaginationModel]):
 
-    sortby: str = Field(
+    sortby: str | None = Field(
         default=None,
-        example="_id"
+        examples=["_id"]
     )
     size: int = Field(
         default=...,
-        example=100
+        examples=[100]
     )
     page: int = Field(
         default=...,
-        example=1
+        examples=[1]
     )
     order: QuerySortingOrder = Field(
         default=QuerySortingOrder.Ascending,
-        example=QuerySortingOrder.Ascending
+        examples=[QuerySortingOrder.Ascending]
     )
     total: int = Field(
         default=...,
-        example=10
+        examples=[10]
     )
     items: List[TGenericPaginationModel] = Field(
         default=...

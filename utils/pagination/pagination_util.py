@@ -1,17 +1,17 @@
 from typing import Any, Dict
 
 import pymongo
-from motor.core import AgnosticClientSession, AgnosticCollection
+from config.mongodb_type_checking import TMongoCollection, TMongoClientSession
 
 from utils.pagination.model_pagination_util import (MsPagination, MsPaginationResult,
                                              QuerySortingOrder,
                                              TGenericPaginationModel)
 async def Paginate(
-    collection: AgnosticCollection,
+    collection: TMongoCollection,
     query_filter: Dict[Any, Any],
     params: MsPagination,
-    session: AgnosticClientSession = None,
-    resultItemsClass: TGenericPaginationModel = TGenericPaginationModel, # must derived from BaseModel
+    resultItemsClass: type[TGenericPaginationModel], # must derived from BaseModel
+    session: TMongoClientSession | None = None,
     **kwargs: Any,
 ) -> MsPaginationResult[TGenericPaginationModel]:
     query_filter = query_filter or {}
@@ -19,7 +19,7 @@ async def Paginate(
     offset = params.size * (params.page - 1)
     cursor = collection.find(
         query_filter,
-        {s if m.alias is None else m.alias: 1 for s, m in resultItemsClass.__fields__.items()},
+        {s if m.alias is None else m.alias: 1 for s, m in resultItemsClass.model_fields.items()},
         skip=offset,
         limit=params.size,
         session=session,
@@ -29,7 +29,7 @@ async def Paginate(
         if params.order is None:
             params.order = QuerySortingOrder.Ascending
         cursor.sort(params.sortby, pymongo.ASCENDING if params.order == QuerySortingOrder.Ascending else pymongo.DESCENDING)
-    items = await cursor.to_list(length=params.size)
+    items: list[dict[str, Any]]= await cursor.to_list(length=params.size) # type: ignore
 
     return MsPaginationResult[resultItemsClass](
         sortby=params.sortby,
@@ -37,5 +37,5 @@ async def Paginate(
         page=params.page,
         order=params.order,
         total=total,
-        items=items,
+        items=[resultItemsClass(**item) for item in  items],
     )
